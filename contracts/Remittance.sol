@@ -3,15 +3,15 @@ pragma solidity ^0.4.19;
 contract Remittance {
 
   bytes32 private hash;
-  address public onlyOwner;
+  address public owner;
   address public recipient;
 
   event LogInvalidated(address indexed owner);
   event LogCreated(address indexed owner, address indexed recipient, uint amount);
   event LogWithdraw(address indexed recipient, uint amount);
 
-  modifier isOwner() {
-      require(msg.sender == onlyOwner);
+  modifier onlyOwner() {
+      require(msg.sender == owner);
       _;
   }
 
@@ -24,11 +24,11 @@ contract Remittance {
     require(recipient != address(0));
     require(recipient != msg.sender);
 
-    onlyOwner = msg.sender;
+    owner = msg.sender;
     recipient = _recipient;
     hash = _hash;
 
-    LogCreated(onlyOwner, recipient, msg.value);
+    LogCreated(owner, recipient, msg.value);
   }
 
   // passwords will be public at this point, but funds can only
@@ -46,10 +46,10 @@ contract Remittance {
     return true;
   }
 
-  function invalidate() public isOwner returns (bool) {
-    LogInvalidated(onlyOwner);
+  function invalidate() public onlyOwner returns (bool) {
+    LogInvalidated(owner);
 
-    selfdestruct(onlyOwner);
+    selfdestruct(owner);
 
     return true;
   }
