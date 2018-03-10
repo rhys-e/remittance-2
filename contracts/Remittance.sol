@@ -36,7 +36,7 @@ contract Remittance {
   // just keccak256(bobsPw) to avoid nasty Carol's rainbow tabling
   function withdraw(bytes32 pw1, bytes32 pw2) public returns(bool) {
     require(msg.sender == recipient);
-    require(keccak256(recipient, pw1, pw2) == hash);
+    require(keccak256(recipient, owner, pw1, pw2) == hash);
 
     uint balance = address(this).balance;
     LogWithdraw(recipient, balance);
