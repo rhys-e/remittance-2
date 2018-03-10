@@ -1,0 +1,22 @@
+{
+  "name": "remittance",
+  "version": "0.0.1",
+  "description": "B9labs Project 1",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rhys-e/remittance.git"
+  },
+  "author": "@re",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rhys-e/remittance/issues"
+  },
+  "homepage": "https://github.com/rhys-e/remittance#readme"
+}

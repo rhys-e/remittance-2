@@ -1,2 +1,2 @@
-# remittance-2
+# remittance
 B9labs Project 2
