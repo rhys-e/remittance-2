@@ -38,10 +38,10 @@ contract Remittance {
     require(msg.sender == recipient);
     require(keccak256(recipient, pw1, pw2) == hash);
 
-    LogWithdraw(recipient, address(this).balance);
+    uint balance = address(this).balance;
+    LogWithdraw(recipient, balance);
 
-    // cheaper than a transfer - any reason to keep contract after this?
-    selfdestruct(recipient);
+    recipient.transfer(balance);
 
     return true;
   }
@@ -49,7 +49,7 @@ contract Remittance {
   function invalidate() public onlyOwner returns (bool) {
     LogInvalidated(owner);
 
-    selfdestruct(owner);
+    owner.transfer(address(this).balance);
 
     return true;
   }
