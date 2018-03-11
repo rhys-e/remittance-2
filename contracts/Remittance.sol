@@ -39,7 +39,10 @@ contract Remittance {
   // passwords will be public at this point, but funds can only
   // be released to the intended recipient. Hash is more involved than
   // just keccak256(bobsPw) to avoid nasty Carol's rainbow tabling
-  function withdraw(bytes32 pw1, bytes32 pw2) public returns(bool) {
+  function withdraw(bytes32 pw1, bytes32 pw2)
+    public
+    returns(bool) {
+
     require(block.number < expiration);
     require(msg.sender == recipient);
     require(keccak256(recipient, owner, pw1, pw2) == hash);
@@ -47,23 +50,26 @@ contract Remittance {
     uint balance = address(this).balance;
 
     recipient.transfer(balance);
-
     LogWithdraw(recipient, balance);
 
     return true;
   }
 
-  function invalidate() public onlyOwner returns (bool) {
+  function invalidate()
+    public
+    onlyOwner
+    returns (bool) {
+
     require(block.number >= expiration);
 
-    LogInvalidated(owner);
-
     owner.transfer(address(this).balance);
+    LogInvalidated(owner);
 
     return true;
   }
 
-  function() private {
+  function()
+    private {
 
   }
 }
