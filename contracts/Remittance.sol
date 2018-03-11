@@ -37,17 +37,13 @@ contract Remittance {
   // be released to the intended recipient. Hash is more involved than
   // just keccak256(bobsPw) to avoid nasty Carol's rainbow tabling
   function withdraw(bytes32 pw1, bytes32 pw2) public returns(bool) {
+    require(block.number < expiration);
+    require(msg.sender == recipient);
+    require(getHash(recipient, owner, pw1, pw2) == hash);
+
     uint balance = address(this).balance;
 
-    if (block.number > expiration) {
-      require(msg.sender == owner);
-      owner.transfer(balance);
-    } else {
-      require(msg.sender == recipient);
-      require(getHash(recipient, owner, pw1, pw2) == hash);
-
-      recipient.transfer(balance);
-    }
+    recipient.transfer(balance);
 
     LogWithdraw(recipient, balance);
 
@@ -62,6 +58,8 @@ contract Remittance {
   }
 
   function invalidate() public onlyOwner returns (bool) {
+    require(block.number >= expiration);
+
     LogInvalidated(owner);
 
     owner.transfer(address(this).balance);
