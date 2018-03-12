@@ -1,11 +1,11 @@
 pragma solidity ^0.4.19;
 
+import "./Ownable.sol";
 import "./Remittance.sol";
 
-contract RemittanceFactory {
+contract RemittanceFactory is Ownable {
 
   address[] public contracts;
-  address public owner;
   uint private gasFee = 53000; // tx fee + contract create fee
   uint private accumulatedFee = 0;
   bool private active = true;
@@ -21,11 +21,6 @@ contract RemittanceFactory {
   event LogResumed();
   event LogWithrawFee(uint fee);
 
-  modifier onlyOwner() {
-    require(msg.sender == owner);
-    _;
-  }
-
   modifier isActive() {
     require(active == true);
     _;
@@ -36,9 +31,7 @@ contract RemittanceFactory {
     _;
   }
 
-  function RemittanceFactory() public {
-    owner = msg.sender;
-  }
+  function RemittanceFactory() public {}
 
   function newRemittance(address recipient, bytes32 hash, uint expiration)
     public

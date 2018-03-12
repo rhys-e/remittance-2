@@ -1,21 +1,17 @@
 pragma solidity ^0.4.19;
 
-contract Remittance {
+import "./Ownable.sol";
+
+contract Remittance is Ownable {
 
   bytes32 private hash;
   uint public expiration;
-  address public owner;
   address public recipient;
   uint public blockLimit = 40320; // roughly a week
 
   event LogInvalidated(address indexed owner);
   event LogCreated(address indexed owner, address indexed recipient, uint amount);
   event LogWithdraw(address indexed recipient, uint amount);
-
-  modifier onlyOwner() {
-      require(msg.sender == owner);
-      _;
-  }
 
   // hash should be constructed from Bob's password and Carol's address.
   // Also including Carol's one-time password (as provided by Alice)
@@ -31,7 +27,6 @@ contract Remittance {
     require(_expiration > 0);
     require(_expiration < blockLimit);
 
-    owner = _owner;
     recipient = _recipient;
     hash = _hash;
     expiration = _expiration + block.number;
