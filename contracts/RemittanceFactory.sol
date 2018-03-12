@@ -36,9 +36,8 @@ contract RemittanceFactory is Ownable {
   function newRemittance(address recipient, bytes32 hash, uint expiration)
     public
     payable
+    isActive
     returns (address) {
-
-      require(active == true);
       uint fee = tx.gasprice * gasFee;
       require(msg.value > fee);
 
