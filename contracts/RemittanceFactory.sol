@@ -7,7 +7,7 @@ contract RemittanceFactory is Ownable {
 
   address[] public contracts;
   uint private gasFee = 53000; // tx fee + contract create fee
-  uint private accumulatedFee = 0;
+  uint public accumulatedFee = 0;
   bool private active = true;
 
   event LogNewRemittance(
