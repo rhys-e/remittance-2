@@ -6,6 +6,7 @@ contract Remittance {
   uint public expiration;
   address public owner;
   address public recipient;
+  uint public blockLimit = 40320; // roughly a week
 
   event LogInvalidated(address indexed owner);
   event LogCreated(address indexed owner, address indexed recipient, uint amount);
@@ -27,6 +28,8 @@ contract Remittance {
     require(msg.value > 0);
     require(_recipient != address(0));
     require(_recipient != _owner);
+    require(_expiration > 0);
+    require(_expiration < blockLimit);
 
     owner = _owner;
     recipient = _recipient;
