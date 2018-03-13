@@ -19,7 +19,7 @@ contract RemittanceFactory is Ownable {
 
   event LogPaused(address indexed sender);
   event LogResumed(address indexed sender);
-  event LogWithrawFee(address indexed sender, uint fee);
+  event LogWithdrawFee(address indexed sender, uint fee);
 
   modifier isActive() {
     require(active == true);
@@ -76,7 +76,7 @@ contract RemittanceFactory is Ownable {
   function withdrawFee()
     public
     onlyOwner {
-      LogWithrawFee(msg.sender, accumulatedFee);
+      LogWithdrawFee(msg.sender, accumulatedFee);
       accumulatedFee = 0;
       owner.transfer(accumulatedFee);
   }
