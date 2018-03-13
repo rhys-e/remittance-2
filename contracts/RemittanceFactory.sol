@@ -5,7 +5,7 @@ import "./Remittance.sol";
 
 contract RemittanceFactory is Ownable {
 
-  address[] public contracts;
+  address[] public remittanceContracts;
   uint private gasFee = 53000; // tx fee + contract create fee
   uint public accumulatedFee = 0;
   bool private active = true;
@@ -44,7 +44,7 @@ contract RemittanceFactory is Ownable {
       accumulatedFee += fee;
       // should we be passing in the owner rather than using msg.sender?
       Remittance r = (new Remittance).value(msg.value - fee)(msg.sender, recipient, hash, expiration);
-      contracts.push(r);
+      remittanceContracts.push(r);
 
       LogNewRemittance(msg.sender, recipient, r, msg.value, expiration + block.number);
       return r;
