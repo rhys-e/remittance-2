@@ -43,10 +43,10 @@ contract RemittanceFactory is Ownable {
 
       accumulatedFee += fee;
       // should we be passing in the owner rather than using msg.sender?
+      LogNewRemittance(msg.sender, recipient, r, msg.value, expiration + block.number);
       Remittance r = (new Remittance).value(msg.value - fee)(msg.sender, recipient, hash, expiration);
       remittanceContracts.push(r);
 
-      LogNewRemittance(msg.sender, recipient, r, msg.value, expiration + block.number);
       return r;
   }
 

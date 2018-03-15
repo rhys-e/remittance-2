@@ -52,8 +52,8 @@ contract Remittance {
 
     uint balance = address(this).balance;
 
-    recipient.transfer(balance);
     LogWithdraw(recipient, balance);
+    recipient.transfer(balance);
 
     return true;
   }
@@ -65,8 +65,8 @@ contract Remittance {
 
     require(block.number >= expiration);
 
-    owner.transfer(address(this).balance);
     LogInvalidated(owner);
+    owner.transfer(address(this).balance);
 
     return true;
   }
