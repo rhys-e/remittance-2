@@ -1,10 +1,11 @@
 pragma solidity ^0.4.19;
 
-contract Remittance {
+import "./Ownable.sol";
+
+contract Remittance is Ownable {
 
   bytes32 private hash;
   uint public expiration;
-  address public owner;
   address public recipient;
   uint public blockLimit = 40320; // roughly a week
 
@@ -12,18 +13,14 @@ contract Remittance {
   event LogCreated(address indexed owner, address indexed recipient, uint amount);
   event LogWithdraw(address indexed recipient, uint amount);
 
-  modifier onlyOwner() {
-      require(msg.sender == owner);
-      _;
-  }
-
   // hash should be constructed from Bob's password and Carol's address.
   // Also including Carol's one-time password (as provided by Alice)
   // otherwise we're building a bit of a rainbow table for Carol the more
   // txs she handles, assuming Alice's allow her to re-use her address.
   function Remittance(address _owner, address _recipient, bytes32 _hash, uint _expiration)
     public
-    payable {
+    payable
+    Ownable(_owner) {
 
     require(msg.value > 0);
     require(_recipient != address(0));
@@ -31,12 +28,11 @@ contract Remittance {
     require(_expiration > 0);
     require(_expiration < blockLimit);
 
-    owner = _owner;
     recipient = _recipient;
     hash = _hash;
     expiration = _expiration + block.number;
 
-    LogCreated(owner, recipient, msg.value);
+    LogCreated(getOwner(), recipient, msg.value);
   }
 
   // passwords will be public at this point, but funds can only
@@ -48,7 +44,7 @@ contract Remittance {
 
     require(block.number < expiration);
     require(msg.sender == recipient);
-    require(keccak256(recipient, owner, pw1, pw2) == hash);
+    require(keccak256(recipient, getOwner(), pw1, pw2) == hash);
 
     uint balance = address(this).balance;
 
@@ -65,8 +61,8 @@ contract Remittance {
 
     require(block.number >= expiration);
 
-    LogInvalidated(owner);
-    owner.transfer(address(this).balance);
+    LogInvalidated(getOwner());
+    getOwner().transfer(address(this).balance);
 
     return true;
   }

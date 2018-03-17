@@ -31,7 +31,9 @@ contract RemittanceFactory is Ownable {
     _;
   }
 
-  function RemittanceFactory() public {}
+  function RemittanceFactory()
+    public
+    Ownable(msg.sender) {}
 
   function newRemittance(address recipient, bytes32 hash, uint expiration)
     public
@@ -78,7 +80,7 @@ contract RemittanceFactory is Ownable {
     onlyOwner {
       LogWithdrawFee(msg.sender, accumulatedFee);
       accumulatedFee = 0;
-      owner.transfer(accumulatedFee);
+      getOwner().transfer(accumulatedFee);
   }
 
   function() private {}
