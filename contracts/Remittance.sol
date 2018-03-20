@@ -1,6 +1,7 @@
 pragma solidity ^0.4.19;
 
 import "./Ownable.sol";
+import "./HashLib.sol";
 
 contract Remittance is Ownable {
 
@@ -44,7 +45,7 @@ contract Remittance is Ownable {
 
     require(block.number < expiration);
     require(msg.sender == recipient);
-    require(keccak256(recipient, getOwner(), pw1, pw2) == hash);
+    require(HashLib.getHash(recipient, getOwner(), pw1, pw2) == hash);
 
     uint balance = address(this).balance;
 
