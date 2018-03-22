@@ -71,8 +71,8 @@ contract RemittanceFactory is Ownable {
   function withdrawFee()
     public
     onlyOwner {
-      LogWithdrawFee(msg.sender, accumulatedFee);
       accumulatedFee = 0;
+      LogWithdrawFee(getOwner(), accumulatedFee);
       getOwner().transfer(accumulatedFee);
   }
 
