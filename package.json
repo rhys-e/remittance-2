@@ -18,5 +18,8 @@
   "bugs": {
     "url": "https://github.com/rhys-e/remittance/issues"
   },
-  "homepage": "https://github.com/rhys-e/remittance#readme"
+  "homepage": "https://github.com/rhys-e/remittance#readme",
+  "devDependencies": {
+    "bluebird": "^3.5.1"
+  }
 }
