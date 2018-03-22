@@ -2,8 +2,9 @@ pragma solidity ^0.4.19;
 
 import "./Ownable.sol";
 import "./Remittance.sol";
+import "./PasswordVerifier.sol";
 
-contract RemittanceFactory is Ownable {
+contract RemittanceFactory is Ownable, PasswordVerifier {
 
   address[] public remittanceContracts;
   uint private gasFee = 53000; // tx fee + contract create fee

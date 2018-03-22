@@ -1,9 +1,9 @@
 pragma solidity ^0.4.19;
 
 import "./Ownable.sol";
-import "./HashLib.sol";
+import "./PasswordVerifier.sol";
 
-contract Remittance is Ownable {
+contract Remittance is Ownable, PasswordVerifier {
 
   bytes32 private hash;
   uint public expiration;
@@ -45,7 +45,7 @@ contract Remittance is Ownable {
 
     require(block.number < expiration);
     require(msg.sender == recipient);
-    require(HashLib.getHash(recipient, getOwner(), pw1, pw2) == hash);
+    require(getHash(recipient, getOwner(), pw1, pw2) == hash);
 
     uint balance = address(this).balance;
 

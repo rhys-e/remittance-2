@@ -1,6 +1,6 @@
 pragma solidity ^0.4.19;
 
-library HashLib {
+contract PasswordVerifier {
   function getHash(address recipAddr, address ownerAddr, bytes32 pw1, bytes32 pw2)
     public
     pure
