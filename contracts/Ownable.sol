@@ -10,6 +10,7 @@ contract Ownable {
   }
 
   function Ownable(address _owner) public {
+    require(_owner != address(0));
     owner = _owner;
   }
 
