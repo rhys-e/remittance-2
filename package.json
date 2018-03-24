@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/rhys-e/remittance#readme",
   "devDependencies": {
+    "@digix/tempo": "^0.2.0",
     "bluebird": "^3.5.1"
   }
 }
