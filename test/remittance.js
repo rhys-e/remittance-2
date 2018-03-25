@@ -123,6 +123,23 @@ contract("Remittance", (accounts) => {
           assert.include(event.event, "LogWithdraw", "didn't receive necessary withdraw event");
         });
     });
+
+    it("should fire an event on a successful invalidate", () => {
+      let instance;
+      const blockNumber = web3.eth.blockNumber;
+      return Remittance.new(owner, recipient, standardHash, 10, { from: deployer, value: 10 })
+        .then((_instance) => {
+          instance = _instance;
+        })
+        .then(() => waitUntilBlock(1, blockNumber + 10))
+        .then(() => instance.invalidate({ from: owner }))
+        .then(() => {
+          return Promise.promisify(instance.allEvents().watch, { context: instance.allEvents() })();
+        })
+        .then((event) => {
+          assert.include(event.event, "LogInvalidate", "didn't receive necessary invalidate event");
+        });
+    });
   });
 
   describe("should reject withdrawal", () => {
@@ -137,11 +154,12 @@ contract("Remittance", (accounts) => {
 
     it("should reject withdrawal if block.number >= expiration", () => {
       let instance;
+      const blockNumber = web3.eth.blockNumber;
       return Remittance.new(owner, recipient, standardHash, 1, { from: deployer, value: 10 })
         .then((_instance) => {
           instance = _instance;
         })
-        .then(() => waitUntilBlock(1, web3.eth.blockNumber + 10))
+        .then(() => waitUntilBlock(1, blockNumber + 10))
         .then(() => instance.withdraw(pwd1, pwd2, { from: recipient }))
         .then(assert.fail)
         .catch(err => {
@@ -177,6 +195,58 @@ contract("Remittance", (accounts) => {
           gasUsed = tx.receipt.gasUsed * gasPrice;
         })
         .then(() => getBalance(recipient))
+        .then((balance) => {
+          assert(balance.eq(initBalance.minus(gasUsed).add(10)));
+        });
+    });
+  });
+
+  describe("should reject invalidate", () => {
+    it("should reject an invalidate not from the owner", () => {
+      let instance;
+      const blockNumber = web3.eth.blockNumber;
+      return Remittance.new(owner, recipient, standardHash, 1, { from: deployer, value: 10 })
+        .then((_instance) => {
+          instance = _instance;
+        })
+        .then(() => waitUntilBlock(1, blockNumber + 5))
+        .then(() => instance.invalidate({ from: recipient }))
+        .then(assert.fail)
+        .catch(err => {
+          assert.include(err.message, "revert", "should revert when invalidate not from owner");
+        });
+    });
+
+    it("should reject an invalidate when not past block expiry", () => {
+      return Remittance.new(owner, recipient, standardHash, 2, { from: deployer, value: 10 })
+        .then((instance) => instance.invalidate({ from: owner }))
+        .then(assert.fail)
+        .catch(err => {
+          assert.include(err.message, "revert", "should revert when invalidate called before block expiry");
+        });
+    });
+  });
+
+  describe("should invalidate", () => {
+    it("should invalidate when block expiry has been met and when called by owner", () => {
+      let instance;
+      let initBalance;
+      let gasUsed;
+      const blockNumber = web3.eth.blockNumber;
+      return Remittance.new(owner, recipient, standardHash, 2, { from: deployer, value: 10 })
+        .then((_instance) => {
+          instance = _instance;
+        })
+        .then(() => getBalance(owner))
+        .then((balance) => {
+          initBalance = balance;
+        })
+        .then(() => waitUntilBlock(1, blockNumber + 5))
+        .then(() => instance.invalidate({ from: owner }))
+        .then((tx) => {
+          gasUsed = tx.receipt.gasUsed * gasPrice;
+        })
+        .then(() => getBalance(owner))
         .then((balance) => {
           assert(balance.eq(initBalance.minus(gasUsed).add(10)));
         });
