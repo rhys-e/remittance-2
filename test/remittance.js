@@ -18,7 +18,7 @@ contract("Remittance", (accounts) => {
   let blockLimit;
 
   before(() => {
-    var p1 = PasswordVerifier.new({ from: owner })
+    const p1 = PasswordVerifier.new({ from: owner })
       .then((instance) => {
         passwordVerifier = instance;
         passwordVerifier.getHash(recipient, owner, pwd1, pwd2)
@@ -27,7 +27,7 @@ contract("Remittance", (accounts) => {
           });
       });
 
-    var p2 = Remittance.new(owner, recipient, standardHash, 10, { from: deployer, value: 1 })
+    const p2 = Remittance.new(owner, recipient, standardHash, 10, { from: deployer, value: 1 })
       .then((instance) => instance.blockLimit())
       .then((limit) => {
         blockLimit = limit.toNumber();
