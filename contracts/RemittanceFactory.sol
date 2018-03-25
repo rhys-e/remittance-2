@@ -1,15 +1,14 @@
 pragma solidity ^0.4.19;
 
-import "./Ownable.sol";
 import "./Remittance.sol";
 import "./PasswordVerifier.sol";
+import "./Stoppable.sol";
 
-contract RemittanceFactory is Ownable, PasswordVerifier {
+contract RemittanceFactory is Stoppable, PasswordVerifier {
 
   address[] public remittanceContracts;
   uint private gasFee = 53000; // tx fee + contract create fee
   uint public accumulatedFee = 0;
-  bool private active = true;
 
   event LogNewRemittance(
     address indexed owner,
@@ -18,18 +17,13 @@ contract RemittanceFactory is Ownable, PasswordVerifier {
     uint amount,
     uint expiration);
 
-  event LogPaused(address indexed sender);
-  event LogResumed(address indexed sender);
   event LogWithdrawFee(address indexed sender, uint fee);
 
-  modifier isActive() {
-    require(active == true);
-    _;
-  }
-
-  modifier isInactive() {
-    require(active == false);
-    _;
+  function remittanceContractCount()
+    public
+    view
+    returns(uint count) {
+    return remittanceContracts.length;
   }
 
   function RemittanceFactory()
@@ -51,22 +45,6 @@ contract RemittanceFactory is Ownable, PasswordVerifier {
       remittanceContracts.push(r);
 
       return r;
-  }
-
-  function resume()
-    public
-    onlyOwner
-    isInactive {
-      active = true;
-      LogResumed(msg.sender);
-  }
-
-  function pause()
-    public
-    onlyOwner
-    isActive {
-      active = false;
-      LogPaused(msg.sender);
   }
 
   function withdrawFee()
