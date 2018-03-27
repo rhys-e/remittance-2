@@ -1,5 +1,6 @@
 const Promise = require("bluebird");
 const { wait, waitUntilBlock } = require("@digix/tempo")(web3);
+const BigNumber = require("big-number");
 const getBalance = Promise.promisify(web3.eth.getBalance);
 const Remittance = artifacts.require("./Remittance.sol");
 const PasswordVerifier = artifacts.require("./PasswordVerifier.sol");
@@ -11,7 +12,7 @@ contract("Remittance", (accounts) => {
   const recipient = accounts[2];
   const pwd1 = "abc";
   const pwd2 = "xyz";
-  const gasPrice = 100000000000;
+  const gasPrice = new BigNumber("100000000000");
 
   let standardHash;
   let passwordVerifier;
@@ -192,7 +193,7 @@ contract("Remittance", (accounts) => {
         })
         .then(() => instance.withdraw(pwd1, pwd2, { from: recipient }))
         .then((tx) => {
-          gasUsed = tx.receipt.gasUsed * gasPrice;
+          gasUsed = new BigNumber(tx.receipt.gasUsed).multiply(gasPrice);
         })
         .then(() => getBalance(recipient))
         .then((balance) => {
@@ -244,7 +245,7 @@ contract("Remittance", (accounts) => {
         .then(() => waitUntilBlock(1, blockNumber + 5))
         .then(() => instance.invalidate({ from: owner }))
         .then((tx) => {
-          gasUsed = tx.receipt.gasUsed * gasPrice;
+          gasUsed = new BigNumber(tx.receipt.gasUsed).multiply(gasPrice);
         })
         .then(() => getBalance(owner))
         .then((balance) => {
