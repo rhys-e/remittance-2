@@ -29,7 +29,7 @@ contract("Remittance", (accounts) => {
       });
 
     const p2 = Remittance.new(owner, recipient, standardHash, 10, { from: deployer, value: 1 })
-      .then((instance) => instance.blockLimit())
+      .then((instance) => instance.getBlockLimit())
       .then((limit) => {
         blockLimit = limit.toNumber();
         assert(typeof blockLimit == "number");

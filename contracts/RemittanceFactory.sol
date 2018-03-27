@@ -8,9 +8,9 @@ contract RemittanceFactory is Stoppable, PasswordVerifier {
 
   address[] public remittanceContracts;
   uint private gasFee = 53000; // tx fee + contract create fee
-  uint public accumulatedFee = 0;
+  uint private accumulatedFee = 0;
 
-  event LogNewRemittance(
+  event LogCreateRemittance(
     address indexed owner,
     address indexed recipient,
     address indexed remittanceAddr,
@@ -30,7 +30,7 @@ contract RemittanceFactory is Stoppable, PasswordVerifier {
     public
     Ownable(msg.sender) {}
 
-  function newRemittance(address recipient, bytes32 hash, uint expiration)
+  function createRemittance(address recipient, bytes32 hash, uint expiration)
     public
     payable
     isActive
@@ -39,12 +39,18 @@ contract RemittanceFactory is Stoppable, PasswordVerifier {
       require(msg.value > fee);
 
       accumulatedFee += fee;
-      // should we be passing in the owner rather than using msg.sender?
-      LogNewRemittance(msg.sender, recipient, r, msg.value, expiration + block.number);
-      Remittance r = (new Remittance).value(msg.value - fee)(msg.sender, recipient, hash, expiration);
-      remittanceContracts.push(r);
+      Remittance trustedRemittance = (new Remittance).value(msg.value - fee)(msg.sender, recipient, hash, expiration);
+      remittanceContracts.push(trustedRemittance);
+      LogCreateRemittance(msg.sender, recipient, trustedRemittance, msg.value, expiration + block.number);
 
-      return r;
+      return trustedRemittance;
+  }
+
+  function getFeeAmount()
+    view
+    public
+    returns (uint fee) {
+    return accumulatedFee;
   }
 
   function withdrawFee()

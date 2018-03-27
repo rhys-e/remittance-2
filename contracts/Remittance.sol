@@ -1,39 +1,54 @@
 pragma solidity ^0.4.19;
 
-import "./Ownable.sol";
+import "./Stoppable.sol";
 import "./PasswordVerifier.sol";
 
-contract Remittance is Ownable, PasswordVerifier {
+contract Remittance is Stoppable, PasswordVerifier {
 
   bytes32 private hash;
-  uint public expiration;
-  address public recipient;
-  uint public blockLimit = 40320; // roughly a week
+  uint private expiration;
+  address private recipient;
+  address private sender;
+  uint private blockLimit = 40320; // roughly a week
 
-  event LogInvalidated(address indexed owner);
-  event LogCreated(address indexed owner, address indexed recipient, uint amount);
+  event LogInvalidated(address indexed sender);
+  event LogCreated(address indexed sender, address indexed recipient, uint amount);
   event LogWithdraw(address indexed recipient, uint amount);
+
+  modifier onlySender() {
+    require(msg.sender == sender);
+    _;
+  }
 
   // hash should be constructed from Bob's password and Carol's address.
   // Also including Carol's one-time password (as provided by Alice)
   // otherwise we're building a bit of a rainbow table for Carol the more
   // txs she handles, assuming Alice's allow her to re-use her address.
-  function Remittance(address _owner, address _recipient, bytes32 _hash, uint _expiration)
+  function Remittance(address _sender, address _recipient, bytes32 _hash, uint _expiration)
     public
     payable
-    Ownable(_owner) {
+    Ownable(msg.sender) {
 
     require(msg.value > 0);
+    require(_sender != address(0));
     require(_recipient != address(0));
-    require(_recipient != _owner);
+    require(_recipient != _sender);
     require(_expiration > 0);
     require(_expiration < blockLimit);
 
+    sender = _sender;
     recipient = _recipient;
     hash = _hash;
     expiration = _expiration + block.number;
 
-    LogCreated(getOwner(), recipient, msg.value);
+    LogCreated(sender, recipient, msg.value);
+  }
+
+  function getBlockLimit()
+    view
+    public
+    returns(uint) {
+      return blockLimit;
   }
 
   // passwords will be public at this point, but funds can only
@@ -45,7 +60,7 @@ contract Remittance is Ownable, PasswordVerifier {
 
     require(block.number < expiration);
     require(msg.sender == recipient);
-    require(getHash(recipient, getOwner(), pw1, pw2) == hash);
+    require(getHash(recipient, sender, pw1, pw2) == hash);
 
     uint balance = address(this).balance;
 
@@ -57,13 +72,13 @@ contract Remittance is Ownable, PasswordVerifier {
 
   function invalidate()
     public
-    onlyOwner
+    onlySender
     returns (bool) {
 
     require(block.number >= expiration);
 
-    LogInvalidated(getOwner());
-    getOwner().transfer(address(this).balance);
+    LogInvalidated(sender);
+    sender.transfer(address(this).balance);
 
     return true;
   }
