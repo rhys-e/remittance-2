@@ -8,7 +8,7 @@ const PasswordVerifier = artifacts.require("./PasswordVerifier.sol");
 contract("Remittance", (accounts) => {
 
   const deployer = accounts[0];
-  const owner = accounts[1];
+  const sender = accounts[1];
   const recipient = accounts[2];
   const pwd1 = "abc";
   const pwd2 = "xyz";
@@ -19,16 +19,16 @@ contract("Remittance", (accounts) => {
   let blockLimit;
 
   before(() => {
-    const p1 = PasswordVerifier.new({ from: owner })
+    const p1 = PasswordVerifier.new({ from: sender })
       .then((instance) => {
         passwordVerifier = instance;
-        passwordVerifier.getHash(recipient, owner, pwd1, pwd2)
+        passwordVerifier.getHash(recipient, sender, pwd1, pwd2)
           .then((_standardHash) => {
             standardHash = _standardHash;
           });
       });
 
-    const p2 = Remittance.new(owner, recipient, standardHash, 10, { from: deployer, value: 1 })
+    const p2 = Remittance.new(sender, recipient, standardHash, 10, { from: deployer, value: 1 })
       .then((instance) => instance.getBlockLimit())
       .then((limit) => {
         blockLimit = limit.toNumber();
@@ -41,39 +41,39 @@ contract("Remittance", (accounts) => {
   describe("should reject instantiation with bad construction data", () => {
 
     it("should reject a contract instantiation with 0 value", () => {
-      return Remittance.new(owner, recipient, standardHash, 10, { from: deployer, value: 0 })
+      return Remittance.new(sender, recipient, standardHash, 10, { from: deployer, value: 0 })
         .then(assert.fail)
         .catch(err => {
           assert.include(err.message, "revert", "should revert on 0 balance transfer");
         });
     });
 
-    it("should reject a contract instantiation with a 0 owner address", () => {
+    it("should reject a contract instantiation with a 0 sender address", () => {
       return Remittance.new(0, recipient, standardHash, 10, { from: deployer, value: 10 })
         .then(assert.fail)
         .catch(err => {
-          assert.include(err.message, "revert", "should revert on 0 owner address");
+          assert.include(err.message, "revert", "should revert on 0 sender address");
         });
     });
 
     it("should reject a contract instantiation with a 0 recipient address", () => {
-      return Remittance.new(owner, 0, standardHash, 10, { from: deployer, value: 10 })
+      return Remittance.new(sender, 0, standardHash, 10, { from: deployer, value: 10 })
         .then(assert.fail)
         .catch(err => {
           assert.include(err.message, "revert", "should revert on 0 recipient address");
         });
     });
 
-    it("should reject a contract where owner == recipient", () => {
-      return Remittance.new(owner, owner, standardHash, 10, { from: deployer, value: 10 })
+    it("should reject a contract where sender == recipient", () => {
+      return Remittance.new(sender, sender, standardHash, 10, { from: deployer, value: 10 })
         .then(assert.fail)
         .catch(err => {
-          assert.include(err.message, "revert", "should revert when owner == recipient");
+          assert.include(err.message, "revert", "should revert when sender == recipient");
         });
     });
 
     it("should reject a contract where expiration <= 0", () => {
-      return Remittance.new(owner, recipient, standardHash, 0, { from: deployer, value: 10 })
+      return Remittance.new(sender, recipient, standardHash, 0, { from: deployer, value: 10 })
         .then(assert.fail)
         .catch(err => {
           assert.include(err.message, "revert", "should revert where expiration <= 0");
@@ -81,7 +81,7 @@ contract("Remittance", (accounts) => {
     });
 
     it("should reject a contract where expiration > block limit", () => {
-      return Remittance.new(owner, recipient, standardHash, web3.eth.blockNumber + blockLimit + 1, { from: deployer, value: 10 })
+      return Remittance.new(sender, recipient, standardHash, web3.eth.blockNumber + blockLimit + 1, { from: deployer, value: 10 })
         .then(assert.fail)
         .catch(err => {
           assert.include(err.message, "revert", "should revert where expiration > block limit");
@@ -91,7 +91,7 @@ contract("Remittance", (accounts) => {
 
   describe("should allow instantiation", () => {
     it("should intantiate with good parameters", () => {
-      return Remittance.new(owner, recipient, standardHash, 10, { from: deployer, value: 10 })
+      return Remittance.new(sender, recipient, standardHash, 10, { from: deployer, value: 10 })
         .catch(err => {
           console.error(err);
           assert.fail(err);
@@ -101,7 +101,7 @@ contract("Remittance", (accounts) => {
 
   describe("should fire events", () => {
     it("should fire an event on a successful instantiation", () => {
-      return Remittance.new(owner, recipient, standardHash, 10, { from: deployer, value: 10 })
+      return Remittance.new(sender, recipient, standardHash, 10, { from: deployer, value: 10 })
         .then((instance) => {
           return Promise.promisify(instance.allEvents().watch, { context: instance.allEvents() })();
         })
@@ -112,7 +112,7 @@ contract("Remittance", (accounts) => {
 
     it("should fire an event on a successful withdrawal", () => {
       let instance;
-      return Remittance.new(owner, recipient, standardHash, 10, { from: deployer, value: 10 })
+      return Remittance.new(sender, recipient, standardHash, 10, { from: deployer, value: 10 })
         .then((_instance) => {
           instance = _instance;
         })
@@ -128,12 +128,12 @@ contract("Remittance", (accounts) => {
     it("should fire an event on a successful invalidate", () => {
       let instance;
       const blockNumber = web3.eth.blockNumber;
-      return Remittance.new(owner, recipient, standardHash, 10, { from: deployer, value: 10 })
+      return Remittance.new(sender, recipient, standardHash, 10, { from: deployer, value: 10 })
         .then((_instance) => {
           instance = _instance;
         })
         .then(() => waitUntilBlock(1, blockNumber + 10))
-        .then(() => instance.invalidate({ from: owner }))
+        .then(() => instance.invalidate({ from: sender }))
         .then(() => {
           return Promise.promisify(instance.allEvents().watch, { context: instance.allEvents() })();
         })
@@ -145,8 +145,8 @@ contract("Remittance", (accounts) => {
 
   describe("should reject withdrawal", () => {
     it("should reject withdrawal if message sender is not the intended recipient", () => {
-      return Remittance.new(owner, recipient, standardHash, 10, { from: deployer, value: 10 })
-        .then((instance) => instance.withdraw(pwd1, pwd2, { from: owner }))
+      return Remittance.new(sender, recipient, standardHash, 10, { from: deployer, value: 10 })
+        .then((instance) => instance.withdraw(pwd1, pwd2, { from: sender }))
         .then(assert.fail)
         .catch(err => {
           assert.include(err.message, "revert", "should revert when msg.sender != recipient");
@@ -156,7 +156,7 @@ contract("Remittance", (accounts) => {
     it("should reject withdrawal if block.number >= expiration", () => {
       let instance;
       const blockNumber = web3.eth.blockNumber;
-      return Remittance.new(owner, recipient, standardHash, 1, { from: deployer, value: 10 })
+      return Remittance.new(sender, recipient, standardHash, 1, { from: deployer, value: 10 })
         .then((_instance) => {
           instance = _instance;
         })
@@ -169,8 +169,8 @@ contract("Remittance", (accounts) => {
     });
 
     it("should reject withdrawal if hash is incorrect", () => {
-      return Remittance.new(owner, recipient, standardHash, 10, { from: deployer, value: 10 })
-        .then((instance) => instance.withdraw(pwd2, pwd1, { from: owner }))
+      return Remittance.new(sender, recipient, standardHash, 10, { from: deployer, value: 10 })
+        .then((instance) => instance.withdraw(pwd2, pwd1, { from: sender }))
         .then(assert.fail)
         .catch(err => {
           assert.include(err.message, "revert", "should revert when hash is incorrect");
@@ -183,7 +183,7 @@ contract("Remittance", (accounts) => {
       let initBalance;
       let instance;
       let gasUsed;
-      return Remittance.new(owner, recipient, standardHash, 10, { from: deployer, value: 10 })
+      return Remittance.new(sender, recipient, standardHash, 10, { from: deployer, value: 10 })
         .then((_instance) => {
           instance = _instance;
         })
@@ -203,10 +203,10 @@ contract("Remittance", (accounts) => {
   });
 
   describe("should reject invalidate", () => {
-    it("should reject an invalidate not from the owner", () => {
+    it("should reject an invalidate not from the sender", () => {
       let instance;
       const blockNumber = web3.eth.blockNumber;
-      return Remittance.new(owner, recipient, standardHash, 1, { from: deployer, value: 10 })
+      return Remittance.new(sender, recipient, standardHash, 1, { from: deployer, value: 10 })
         .then((_instance) => {
           instance = _instance;
         })
@@ -214,13 +214,13 @@ contract("Remittance", (accounts) => {
         .then(() => instance.invalidate({ from: recipient }))
         .then(assert.fail)
         .catch(err => {
-          assert.include(err.message, "revert", "should revert when invalidate not from owner");
+          assert.include(err.message, "revert", "should revert when invalidate not from sender");
         });
     });
 
     it("should reject an invalidate when not past block expiry", () => {
-      return Remittance.new(owner, recipient, standardHash, 2, { from: deployer, value: 10 })
-        .then((instance) => instance.invalidate({ from: owner }))
+      return Remittance.new(sender, recipient, standardHash, 2, { from: deployer, value: 10 })
+        .then((instance) => instance.invalidate({ from: sender }))
         .then(assert.fail)
         .catch(err => {
           assert.include(err.message, "revert", "should revert when invalidate called before block expiry");
@@ -229,25 +229,25 @@ contract("Remittance", (accounts) => {
   });
 
   describe("should invalidate", () => {
-    it("should invalidate when block expiry has been met and when called by owner", () => {
+    it("should invalidate when block expiry has been met and when called by sender", () => {
       let instance;
       let initBalance;
       let gasUsed;
       const blockNumber = web3.eth.blockNumber;
-      return Remittance.new(owner, recipient, standardHash, 2, { from: deployer, value: 10 })
+      return Remittance.new(sender, recipient, standardHash, 2, { from: deployer, value: 10 })
         .then((_instance) => {
           instance = _instance;
         })
-        .then(() => getBalance(owner))
+        .then(() => getBalance(sender))
         .then((balance) => {
           initBalance = balance;
         })
         .then(() => waitUntilBlock(1, blockNumber + 5))
-        .then(() => instance.invalidate({ from: owner }))
+        .then(() => instance.invalidate({ from: sender }))
         .then((tx) => {
           gasUsed = new BigNumber(tx.receipt.gasUsed).multiply(gasPrice);
         })
-        .then(() => getBalance(owner))
+        .then(() => getBalance(sender))
         .then((balance) => {
           assert(balance.eq(initBalance.minus(gasUsed).add(10)));
         });

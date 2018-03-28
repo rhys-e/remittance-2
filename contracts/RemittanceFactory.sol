@@ -11,10 +11,11 @@ contract RemittanceFactory is Stoppable, PasswordVerifier {
   uint private accumulatedFee = 0;
 
   event LogCreateRemittance(
-    address indexed owner,
-    address indexed recipient,
     address indexed remittanceAddr,
-    uint amount,
+    address indexed sender,
+    address indexed recipient,
+    uint amountDeposited,
+    uint feeClaimed,
     uint expiration);
 
   event LogWithdrawFee(address indexed sender, uint fee);
@@ -40,10 +41,11 @@ contract RemittanceFactory is Stoppable, PasswordVerifier {
       require(msg.value > fee);
 
       accumulatedFee += fee;
-      Remittance trustedRemittance = (new Remittance).value(msg.value - fee)(msg.sender, recipient, hash, expiration);
+      uint amount = msg.value - fee;
+      Remittance trustedRemittance = (new Remittance).value(amount)(msg.sender, recipient, hash, expiration);
       remittanceExists[trustedRemittance] = true;
       // ideally would log this before, but obviously can't log the contract address before it's created
-      LogCreateRemittance(msg.sender, recipient, trustedRemittance, msg.value, expiration + block.number);
+      LogCreateRemittance(trustedRemittance, msg.sender, recipient, amount, fee, (expiration + block.number));
 
       return trustedRemittance;
   }
@@ -78,7 +80,7 @@ contract RemittanceFactory is Stoppable, PasswordVerifier {
     trustedRemittance.pause();
   }
 
-  function getFeeAmount()
+  function getAccumulatedFeeAmount()
     view
     public
     returns (uint fee) {
