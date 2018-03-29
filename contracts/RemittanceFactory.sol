@@ -36,7 +36,8 @@ contract RemittanceFactory is Stoppable, PasswordVerifier {
     public
     payable
     isActive
-    returns (address) {
+    returns (address)
+    {
       uint fee = tx.gasprice * gasFee;
       require(msg.value > fee);
 
@@ -83,17 +84,19 @@ contract RemittanceFactory is Stoppable, PasswordVerifier {
   function getAccumulatedFeeAmount()
     view
     public
-    returns (uint fee) {
+    returns (uint fee)
+  {
     return accumulatedFee;
   }
 
   function withdrawFee()
     public
-    onlyOwner {
-      uint fee = accumulatedFee;
-      accumulatedFee = 0;
-      LogWithdrawFee(getOwner(), fee);
-      getOwner().transfer(fee);
+    onlyOwner
+  {
+    uint fee = accumulatedFee;
+    accumulatedFee = 0;
+    LogWithdrawFee(getOwner(), fee);
+    getOwner().transfer(fee);
   }
 
   function() private {}

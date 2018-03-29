@@ -27,8 +27,8 @@ contract Remittance is Stoppable, PasswordVerifier {
   function Remittance(address _sender, address _recipient, bytes32 _hash, uint _expiration)
     public
     payable
-    Ownable(msg.sender) {
-
+    Ownable(msg.sender)
+  {
     require(msg.value > 0);
     require(_sender != address(0));
     require(_recipient != address(0));
@@ -47,7 +47,8 @@ contract Remittance is Stoppable, PasswordVerifier {
   function getBlockLimit()
     view
     public
-    returns(uint) {
+    returns(uint)
+  {
       return blockLimit;
   }
 
@@ -56,8 +57,8 @@ contract Remittance is Stoppable, PasswordVerifier {
   // just keccak256(bobsPw) to avoid nasty Carol's rainbow tabling
   function withdraw(bytes32 pw1, bytes32 pw2)
     public
-    returns(bool) {
-
+    returns(bool)
+  {
     require(block.number < expiration);
     require(msg.sender == recipient);
     require(getHash(recipient, sender, pw1, pw2) == hash);
@@ -73,8 +74,8 @@ contract Remittance is Stoppable, PasswordVerifier {
   function invalidate()
     public
     onlySender
-    returns (bool) {
-
+    returns (bool)
+  {
     require(block.number >= expiration);
 
     LogInvalidated(sender);
@@ -84,7 +85,7 @@ contract Remittance is Stoppable, PasswordVerifier {
   }
 
   function()
-    private {
-
+    private
+  {
   }
 }

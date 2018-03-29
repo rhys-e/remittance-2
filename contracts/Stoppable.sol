@@ -20,17 +20,19 @@ contract Stoppable is Ownable {
   function resume()
     public
     onlyOwner
-    isInactive {
-      active = true;
-      LogActiveState(active);
+    isInactive
+  {
+    active = true;
+    LogActiveState(active);
   }
 
   function pause()
     public
     onlyOwner
-    isActive {
-      active = false;
-      LogActiveState(active);
+    isActive
+  {
+    active = false;
+    LogActiveState(active);
   }
 
   function isRunning()

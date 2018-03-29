@@ -15,16 +15,21 @@ contract Ownable {
     owner = _owner;
   }
 
-  function getOwner() view public returns(address) {
+  function getOwner()
+    view
+    public
+    returns(address)
+  {
     return owner;
   }
 
   function changeOwner(address newOwner)
     public
-    onlyOwner {
-      require(newOwner != address(0));
+    onlyOwner
+  {
+    require(newOwner != address(0));
 
-      LogNewOwner(newOwner, owner);
-      owner = newOwner;
+    LogNewOwner(newOwner, owner);
+    owner = newOwner;
   }
 }
