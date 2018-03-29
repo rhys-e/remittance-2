@@ -1,6 +1,6 @@
 const Promise = require("bluebird");
 const { wait, waitUntilBlock } = require("@digix/tempo")(web3);
-const BigNumber = require("big-number");
+const BigNumber = require("bignumber.js");
 const getBalance = Promise.promisify(web3.eth.getBalance);
 const Remittance = artifacts.require("./Remittance.sol");
 const PasswordVerifier = artifacts.require("./PasswordVerifier.sol");
@@ -193,7 +193,7 @@ contract("Remittance", (accounts) => {
         })
         .then(() => instance.withdraw(pwd1, pwd2, { from: recipient }))
         .then((tx) => {
-          gasUsed = new BigNumber(tx.receipt.gasUsed).multiply(gasPrice);
+          gasUsed = new BigNumber(tx.receipt.gasUsed).times(gasPrice);
         })
         .then(() => getBalance(recipient))
         .then((balance) => {
@@ -245,7 +245,7 @@ contract("Remittance", (accounts) => {
         .then(() => waitUntilBlock(1, blockNumber + 5))
         .then(() => instance.invalidate({ from: sender }))
         .then((tx) => {
-          gasUsed = new BigNumber(tx.receipt.gasUsed).multiply(gasPrice);
+          gasUsed = new BigNumber(tx.receipt.gasUsed).times(gasPrice);
         })
         .then(() => getBalance(sender))
         .then((balance) => {

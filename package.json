@@ -21,7 +21,7 @@
   "homepage": "https://github.com/rhys-e/remittance#readme",
   "devDependencies": {
     "@digix/tempo": "^0.2.0",
-    "big-number": "^0.4.0",
+    "bignumber.js": "^6.0.0",
     "bluebird": "^3.5.1"
   }
 }

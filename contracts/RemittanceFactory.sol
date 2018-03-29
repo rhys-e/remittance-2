@@ -90,9 +90,10 @@ contract RemittanceFactory is Stoppable, PasswordVerifier {
   function withdrawFee()
     public
     onlyOwner {
+      uint fee = accumulatedFee;
       accumulatedFee = 0;
-      LogWithdrawFee(getOwner(), accumulatedFee);
-      getOwner().transfer(accumulatedFee);
+      LogWithdrawFee(getOwner(), fee);
+      getOwner().transfer(fee);
   }
 
   function() private {}

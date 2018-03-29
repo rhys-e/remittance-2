@@ -33,5 +33,13 @@ contract Stoppable is Ownable {
       LogActiveState(active);
   }
 
+  function isRunning()
+    public
+    view
+    returns(bool running)
+  {
+    return active;
+  }
+
   function() private {}
 }
