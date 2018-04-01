@@ -1,8 +1,8 @@
 pragma solidity ^0.4.19;
 
 import "./Remittance.sol";
-import "./PasswordVerifier.sol";
-import "./Stoppable.sol";
+import "../PasswordVerifier.sol";
+import "../Stoppable.sol";
 
 contract RemittanceFactory is Stoppable, PasswordVerifier {
 

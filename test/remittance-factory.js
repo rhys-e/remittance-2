@@ -2,8 +2,8 @@ const Promise = require("bluebird");
 const { wait, waitUntilBlock } = require("@digix/tempo")(web3);
 const BigNumber = require("bignumber.js");
 const getBalance = Promise.promisify(web3.eth.getBalance);
-const RemittanceFactory = artifacts.require("./RemittanceFactory.sol");
-const Remittance = artifacts.require("./Remittance.sol");
+const RemittanceFactory = artifacts.require("./remittance-hub/RemittanceFactory.sol");
+const Remittance = artifacts.require("./remittance-hub/Remittance.sol");
 
 //todo: events
 contract("RemittanceFactory", (accounts) => {

@@ -1,8 +1,5 @@
-var RemittanceFactory = artifacts.require("./RemittanceFactory.sol");
-var HashLib = artifacts.require("./HashLib.sol");
+var RemittanceFactory = artifacts.require("./remittance-hub/RemittanceFactory.sol");
 
 module.exports = function(deployer) {
-  deployer.deploy(HashLib);
-  deployer.link(HashLib, RemittanceFactory);
   deployer.deploy(RemittanceFactory);
 }

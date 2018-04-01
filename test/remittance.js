@@ -2,7 +2,7 @@ const Promise = require("bluebird");
 const { wait, waitUntilBlock } = require("@digix/tempo")(web3);
 const BigNumber = require("bignumber.js");
 const getBalance = Promise.promisify(web3.eth.getBalance);
-const Remittance = artifacts.require("./Remittance.sol");
+const Remittance = artifacts.require("./remittance-hub/Remittance.sol");
 const PasswordVerifier = artifacts.require("./PasswordVerifier.sol");
 
 contract("Remittance", (accounts) => {
