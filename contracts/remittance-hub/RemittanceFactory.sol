@@ -55,30 +55,36 @@ contract RemittanceFactory is Stoppable, PasswordVerifier {
     public
     onlyOwner
     onlyIfRemittance(remittance)
+    returns(bool success)
   {
     Remittance trustedRemittance = Remittance(remittance);
     LogNewRemittanceOwner(msg.sender, newOwner, trustedRemittance);
     trustedRemittance.changeOwner(newOwner);
+    return true;
   }
 
   function resumeRemittance(address remittance)
     public
     onlyOwner
     onlyIfRemittance(remittance)
+    returns(bool success)
   {
     Remittance trustedRemittance = Remittance(remittance);
     LogResumeRemittance(msg.sender, trustedRemittance);
     trustedRemittance.resume();
+    return true;
   }
 
   function pauseRemittance(address remittance)
     public
     onlyOwner
     onlyIfRemittance(remittance)
+    returns(bool success)
   {
     Remittance trustedRemittance = Remittance(remittance);
     LogPauseRemittance(msg.sender, trustedRemittance);
     trustedRemittance.pause();
+    return true;
   }
 
   function getAccumulatedFeeAmount()
@@ -92,11 +98,13 @@ contract RemittanceFactory is Stoppable, PasswordVerifier {
   function withdrawFee()
     public
     onlyOwner
+    returns(bool success)
   {
     uint fee = accumulatedFee;
     accumulatedFee = 0;
     LogWithdrawFee(getOwner(), fee);
     getOwner().transfer(fee);
+    return true;
   }
 
   function() private {}
