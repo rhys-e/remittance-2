@@ -12,9 +12,10 @@ contract Remittance is Stoppable, PasswordVerifier {
 
   mapping (bytes32 => Exchange) public exchanges;
 
-  uint private gasFee = 53000; // tx fee + contract create fee
+  uint constant public GAS_FEE = 21000 + 32000; // tx fee + contract create fee
+  uint constant public BLOCK_LIMIT = (60 * 60 * 24 * 7) / 15; // roughly a week of blocks
+
   uint private accumulatedFee = 0;
-  uint private blockLimit = 40320; // roughly a week
 
   event LogWithdrawFee(address indexed sender, uint fee);
   event LogWithdraw(
@@ -45,7 +46,7 @@ contract Remittance is Stoppable, PasswordVerifier {
     isActive
     payable
   {
-    uint fee = tx.gasprice * gasFee;
+    uint fee = tx.gasprice * GAS_FEE;
     require(msg.value > fee);
     Exchange storage exchange = exchanges[hash];
     require(exchange.sender == address(0));
@@ -53,7 +54,7 @@ contract Remittance is Stoppable, PasswordVerifier {
     require(recipient != address(0));
     require(recipient != msg.sender);
     require(expiration > 0);
-    require(expiration < blockLimit);
+    require(expiration < BLOCK_LIMIT);
 
     accumulatedFee += fee;
     uint amount = msg.value - fee;
