@@ -67,12 +67,12 @@ contract Remittance is Stoppable, PasswordVerifier {
     LogRemittanceCreated(msg.sender, recipient, amount, fee, expiresAtBlock);
   }
 
-  function withdraw(address sender, bytes32 pw1, bytes32 pw2)
+  function withdraw(bytes32 pw1, bytes32 pw2)
     public
     isActive
     returns(bool)
   {
-    bytes32 hash = getHash(msg.sender, sender, pw1, pw2);
+    bytes32 hash = getHash(msg.sender, this, pw1, pw2);
     Exchange storage exchange = exchanges[hash];
     uint amount = exchange.amount;
 
